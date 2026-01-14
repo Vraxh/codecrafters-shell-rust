@@ -2,15 +2,19 @@
 use std::io::{self, Write};
 
 fn main() {
-    // TODO: Uncomment the code below to pass the first stage
-    
-    // Handle invalid commands
     
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
+        // Handle invalid commands
         let mut command = String::new();
         io::stdin().read_line(&mut command).unwrap();
-        println!("{}: command not found", command.trim());
+        let str_command = command.trim();
+        match str_command{
+            "exit" => break,
+            _ => {
+                println!("{}: command not found", command.trim());
+            }
+        }
     }
 }
