@@ -1,32 +1,59 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
+const BUILT_IN_COMMANDS: [&str; 3] = ["echo", "exit", "type"];
+enum Command {
+    ExitCommand,
+    EchoCommand { display_string: String },
+    TypeCommand { command_name: String },
+    CommandNotFound,
+}
+
+impl Command {
+    fn from_input(input: &str) -> Self {
+        let input = input.trim();
+        if input == "exit" {
+            return Self::ExitCommand;
+        };
+        if let Some(pos) = input.find("echo ") {
+            if pos == 0 {
+                return Self::EchoCommand {
+                    display_string: input["echo ".len()..].to_string(),
+                };
+            }
+        }
+        if let Some(pos) = input.find("type ") {
+            if pos == 0 {
+                return Self::TypeCommand {
+                    command_name: input["type ".len()..].to_string(),
+                };
+            }
+        }
+        Self::CommandNotFound
+    }
+}
+
 fn main() {
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
-        let mut command = String::new();
-        match io::stdin().read_line(&mut command) {
-            Ok(_) if command.trim().is_empty() => continue,
-            Ok(_) if command.trim() == "exit" => return,
-            Ok(_) if command.starts_with("echo ") => {
-                let args = command.trim_start_matches("echo").trim();
-                println!("{}", args);
-            }
-            Ok(_) if command.starts_with("type ") => {
-                if command.contains("type type") {
-                    println!("type is a shell builtin");
-                } else if command.contains("exit") {
-                    println!("exit is a shell builtin");
-                } else if command.contains("echo") {
-                    println!("echo is a shell builtin");
+
+        let stdin = io::stdin();
+        let mut input = String::new();
+        stdin.read_line(&mut input).unwrap();
+        let command = Command::from_input(&input);
+
+        match command {
+            Command::ExitCommand => break,
+            Command::EchoCommand { display_string } => println!("{}", display_string),
+            Command::TypeCommand { command_name } => {
+                if BUILT_IN_COMMANDS.contains(&command_name.as_str()) {
+                    println!("{} is a shell builtin", command_name);
                 } else {
-                    let cmd_name = command.trim_start_matches("type").trim();
-                    println!("{}: not found", cmd_name);
+                    println!("{}: not found", command_name)
                 }
             }
-            Ok(_) => println!("{}: command not found", command.trim()),
-            Err(error) => println!("error: {error}"),
+            Command::CommandNotFound => println!("{}: command not found", input.trim()),
         }
     }
 }
