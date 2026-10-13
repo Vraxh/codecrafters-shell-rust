@@ -1,7 +1,7 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
 
-const BUILT_IN_COMMANDS: [&str; 4] = ["echo", "exit", "type", "ls"];
+const BUILT_IN_COMMANDS: [&str; 4] = ["echo", "exit", "type"];
 enum Command {
     ExitCommand,
     EchoCommand { display_string: String },
